@@ -1,6 +1,12 @@
+function sendMessageToTab(tabId, message) {
+  return new Promise((resolve) => {
+      chrome.tabs.sendMessage(tabId, message, resolve)
+  })
+}
+
 const replace_text = () => {
   chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
-    chrome.tabs.sendMessage(tabs[0].id, "");  
+    sendMessageToTab(tabs[0].id, "")
     });
 }
 
