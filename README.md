@@ -1,11 +1,10 @@
 # <img src="public/icons/icon_48.png" width="45" align="left"> Web Translate
 
-My Chrome Extension
+Live website translation
 
 ## Features
 
-- Feature 1
-- Feature 2
+- Live translate selected text
 
 ## Install
 
