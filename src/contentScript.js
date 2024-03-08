@@ -7,19 +7,37 @@ const translate = async (text) => {
   return JSON.stringify(myJson['sentences'][0]["trans"], null, '\t');
 }
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  selection = document.getSelection();
+async function modifyText(node) {
+  if (node.nodeType === 3) { // Text node
+      var originalText = node.nodeValue;
+      
+      if (originalText.trim() !== '') {
+          // Add the letter "a" to the end of non-empty text content
+          var modifiedText = await translate(originalText).then();
+          
+          // Replace the original text content with the modified text
+          node.nodeValue = modifiedText.replace(/['"]+/g, '');
+      }
+  } else if (node.nodeType === 1) { // Element node
+      // Recursively modify text content for child elements
+      node.childNodes.forEach(modifyText);
+  }
 
-  if (selection) {
-    for (i=0; i<selection.rangeCount; i++)  {
-        range = selection.getRangeAt(i);
-        if (range) {
-            translate(range.startContainer.parentNode.textContent).then((x) => {
-              range.startContainer.parentNode.textContent = x.replace(/['"]+/g, '')
-            })
-        }
-    }
+  await new Promise(r => setTimeout(r, 200));
 }
+
+var observer = new MutationObserver(function (mutations) {
+  mutations.forEach(function (mutation) {
+      if (mutation.type === 'childList') {
+          // If child nodes are added, modify their text content
+          mutation.addedNodes.forEach(modifyText);
+      }
+  });
+});
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  modifyText(document.body);
+  observer.observe(document.body, { childList: true, subtree: true });
 
   return true;
 });
